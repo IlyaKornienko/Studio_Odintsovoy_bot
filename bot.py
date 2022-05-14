@@ -26,14 +26,14 @@ def cmd_start(message):
 # По команде /reset будем сбрасывать состояния, возвращаясь к началу диалога
 @bot.message_handler(commands=["reset"])
 def cmd_reset(message):
-    bot.send_message(message.chat.id, "Що ж, почнемо по-новому. Як тебе звати?")
+    bot.send_message(message.chat.id, "*Що ж, почнемо по-новому. Як тебе звати?*", parse_mode= "Markdown")
     dbworker.set_state(message.chat.id, config.States.S_ENTER_NAME.value)
 
 
 @bot.message_handler(func=lambda message: dbworker.get_current_state(message.chat.id) == config.States.S_ENTER_NAME.value)
 def user_entering_name(message):
     # В случае с именем не будем ничего проверять, пусть хоть "25671", хоть Евкакий
-    bot.send_message(message.chat.id, "Чудове ім'я, запам'ятаю! Тепер вкажіть, будь ласка, свій вік.")
+    bot.send_message(message.chat.id, "Чудове ім'я, запам'ятаю! Тепер вкажіть, будь ласка, свій" "*вік*", parse_mode= "Markdown")
     dbworker.set_state(message.chat.id, config.States.S_ENTER_AGE.value)
 
 
@@ -50,7 +50,7 @@ def user_entering_age(message):
         return
     else:
         # Возраст введён корректно, можно идти дальше
-        bot.send_message(message.chat.id, "Коли ви замовляли квіти ви обирали 1-самовивіз 2-доставка (вкажи число)?")
+        bot.send_message(message.chat.id, "Коли ви замовляли квіти ви обирали" " *1-самовивіз 2-доставка (вкажи число)?*", parse_mode= "Markdown")
         dbworker.set_state(message.chat.id, config.States.S_ENTER_DOST.value)
 
 
