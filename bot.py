@@ -11,11 +11,13 @@ bot = telebot.TeleBot(config.token)
 def cmd_start(message):
     state = dbworker.get_current_state(message.chat.id)
     if state == config.States.S_ENTER_NAME.value:
-        bot.send_message(message.chat.id, "Вкажіть, будь ласка, своє ім'я:( Чекаю...")
+        bot.send_message(message.chat.id, "Вкажіть, будь ласка, своє ім'я:( Чекаю...)")
     elif state == config.States.S_ENTER_AGE.value:
-        bot.send_message(message.chat.id, "Вкажіть свій вік:( Чекаю...")
+        bot.send_message(message.chat.id, "Вкажіть свій вік:( Чекаю...)")
+    elif state == config.States.S_ENTER_DOST.value:
+        bot.send_message(message.chat.id, "Вкажіть, який спосіб доставки ви обрали:( Чекаю...)")
     elif state == config.States.S_ENTER_VOITE.value:
-        bot.send_message(message.chat.id, "Вкажіть, наскільки вам сподобалося обслуговування:( Чекаю...")
+        bot.send_message(message.chat.id, "Вкажіть, наскільки вам сподобалося обслуговування:( Чекаю...)")
     else:  # Под "остальным" понимаем состояние "0" - начало диалога
         bot.send_message(message.chat.id, "Привіт! Як я можу звертатися до тебе?")
         dbworker.set_state(message.chat.id, config.States.S_ENTER_NAME.value)
@@ -27,12 +29,6 @@ def cmd_reset(message):
     bot.send_message(message.chat.id, "Що ж, почнемо по-новому. Як тебе звати?")
     dbworker.set_state(message.chat.id, config.States.S_ENTER_NAME.value)
 
-@bot.message_handler(commands=["maps"])
-def cmd_maps(message):
-    markup = types.InlineKeyboardMarkup()
-    button1 = types.InlineKeyboardButton("Google", url='https://google.com/')
-    markup.add(button1)
-    dbworker.set_state(message.chat.id, config.States.S_ENTER_NAME.value)
 
 @bot.message_handler(func=lambda message: dbworker.get_current_state(message.chat.id) == config.States.S_ENTER_NAME.value)
 def user_entering_name(message):
@@ -54,7 +50,24 @@ def user_entering_age(message):
         return
     else:
         # Возраст введён корректно, можно идти дальше
-        bot.send_message(message.chat.id, "Колись і мені було стільки років... ех... Втім, не відволікатимемося. "
+        bot.send_message(message.chat.id, "Коли ви замовляли квіти ви обирали 1-самовивіз 2-доставка (вкажи число)?")
+        dbworker.set_state(message.chat.id, config.States.S_ENTER_DOST.value)
+
+
+@bot.message_handler(func=lambda message: dbworker.get_current_state(message.chat.id) == config.States.S_ENTER_DOST.value)
+def user_entering_age(message):
+    # А вот тут сделаем проверку
+    if not message.text.isdigit():
+        # Состояние не меняем, поэтому только выводим сообщение об ошибке и ждём дальше
+        bot.send_message(message.chat.id, "Щось не так, спробуй ще раз!")
+        return
+    # На данном этапе мы уверены, что message.text можно преобразовать в число, поэтому ничем не рискуем
+    if int(message.text) < 1 or int(message.text) > 2:
+        bot.send_message(message.chat.id, "Немає такого варінту. Спробуй ще 1-самовивіз чи 2-доставка")
+        return
+    else:
+        # Возраст введён корректно, можно идти дальше
+        bot.send_message(message.chat.id, "Круто! Дякую тобі!"
                                           "Як тобі обслуговування в нашому магазині (від 1 до 5)?")
         dbworker.set_state(message.chat.id, config.States.S_ENTER_VOITE.value)
 
@@ -64,15 +77,14 @@ def user_entering_voite(message):
     # А вот тут сделаем проверку
     if not message.text.isdigit():
         # Состояние не меняем, поэтому только выводим сообщение об ошибке и ждём дальше
-        bot.send_message(message.chat.id, "Щось не так, спробуй ще раз!")
+        bot.send_message(message.chat.id, "Щось не так, спробуй ще раз!!!")
         return
     # На данном этапе мы уверены, что message.text можно преобразовать в число, поэтому ничем не рискуем
     if int(message.text) < 1 or int(message.text) > 5:
         bot.send_message(message.chat.id, "Поставте будь ласка оцінку від 1 до 5.")
         return
     else:
-        bot.send_message(message.chat.id, "Дякуємо тобі за твій відгук. Залиши будьласка відгук на google /maps. "
-                                          "Якщо захочеш залишити відгук знову - надішліть команду /start.")
+        bot.send_message(message.chat.id, "Дякуємо тобі за твій відгук. Залиши будьласка відгук на " '[google maps](https://g.page/studio-odintsovoy-flowers?share)', parse_mode='Markdown')
         dbworker.set_state(message.chat.id, config.States.S_START.value)
 
 if __name__ == "__main__":

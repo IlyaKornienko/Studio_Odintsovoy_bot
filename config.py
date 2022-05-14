@@ -12,4 +12,5 @@ class States(Enum):
     S_START = "0"  # Начало нового диалога
     S_ENTER_NAME = "1"
     S_ENTER_AGE = "2"
-    S_ENTER_VOITE = "3"
+    S_ENTER_DOST = "3"
+    S_ENTER_VOITE = "4"
